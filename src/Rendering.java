@@ -174,7 +174,7 @@ public class Rendering extends JPanel{
     		 g2.setColor(Color.BLACK);
     		 g2.setFont(new Font("Courier New",Font.BOLD,50));
     		 g2.drawString("КРАЙ НА ИГРАТА", 210, 450);
-    		 g2.drawString("(R) За рестарт", 210, 500);
+    		 g2.drawString("(R) За рестарт", 200, 500);
     	 }
     	 if(Cross.isPaused){
     		 g2.setColor(Color.BLUE);

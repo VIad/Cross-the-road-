@@ -329,7 +329,7 @@ public class Obstacles{
 					   Cross.isOver = true;
 				   }
 				  }else{
-					  if(Cross.player.x - obstacle.get(i).x >= -135 && Cross.player.x - obstacle.get(i).x<= 65){
+					  if(Cross.player.x - obstacle.get(i).x >= 0 && Cross.player.x - obstacle.get(i).x<= 200){
 						  Cross.isOver = true;
 					   }
 				  }

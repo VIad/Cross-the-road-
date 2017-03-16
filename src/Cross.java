@@ -4,8 +4,8 @@ import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.security.SecureRandom;
-
 import javax.swing.JFrame;
+
 
 public class Cross extends KeyAdapter implements Runnable{
 
@@ -40,7 +40,7 @@ public class Cross extends KeyAdapter implements Runnable{
 	private boolean             firstEvent;
 	private boolean             keyWasReleased;
 	private long                move;
-	
+	 
 	
 	
 	public static void main(String args[]){
@@ -84,8 +84,6 @@ public class Cross extends KeyAdapter implements Runnable{
 	    obstacles.createObstacleLines();
 	}
 	
-	
-	//MAIN GAME THREAD;
 	@Override
 	public void run(){
 		while(!isOver){
@@ -117,11 +115,7 @@ public class Cross extends KeyAdapter implements Runnable{
 		}
 		
 	}
-	
-	
-	
-	
-	
+	 
 	//MAIN GAME THREAD : END
 	
 	@Override
