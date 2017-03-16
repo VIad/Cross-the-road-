@@ -1,12 +1,14 @@
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Random;
 
 public class TerrainBuilder{
 	
 	private Toolkit        tool = Toolkit.getDefaultToolkit();
+	private SecureRandom   rand = new SecureRandom();
 	
 	final Point            Terrain_safe_start = new Point(0,800);
 	
@@ -19,10 +21,12 @@ public class TerrainBuilder{
 	final Image            Terrain_water = tool.getImage(getClass().getResource("Terrain/Water_terrain.jpg"));
 	final Image            Terrain_water_big = tool.getImage(getClass().getResource("Terrain/Water_terrain_big.jpg"));
 	
+	final Image            Terrain_train = tool.getImage(getClass().getResource("Terrain/Train.png"));
 	
 	static final int       SAFE_TERRAIN = 0;
 	static final int       ROAD_TERRAIN = 1;
 	static final int       WATER_TERRAIN = 2;
+	static final int       TRAIN_TERRAIN = 3;
 	
 	ArrayList<Point>       obs_start_finish = new ArrayList<Point>();
 	ArrayList<Integer>     terrain = new ArrayList<Integer>();
@@ -37,11 +41,11 @@ public class TerrainBuilder{
 		bigTerrain.clear();
 		
 		while(remainingPixels >= 0){
-			int toAdd = new Random().nextInt(3);
+			int toAdd = new Random().nextInt(4);
 			if(toAdd == ROAD_TERRAIN){
 				
 				terrain.add(ROAD_TERRAIN);
-				boolean isTerrainbig = new Random().nextBoolean();
+				boolean isTerrainbig = rand.nextBoolean();
 				bigTerrain.add(isTerrainbig);
 				
 				if(isTerrainbig){
@@ -92,19 +96,37 @@ public class TerrainBuilder{
 					
 				}	
 			}
+			if(toAdd == TRAIN_TERRAIN){
+				terrain.add(TRAIN_TERRAIN);
+				bigTerrain.add(false);
+				terrainAXIS.add(new Point(0,remainingPixels));
+				remainingPixels -=100;
+			}
 		
 		}
 		
 		int countOfSafe = 0;
 		for(int i =0;i<terrain.size();i++){
-			
 			if(terrain.get(i) == SAFE_TERRAIN && countOfSafe <1){
 				countOfSafe++;
-				
 			}else{
-				
-				terrain.set(i, new Random().nextInt(2) + 1);
-				
+				terrain.set(i, new Random().nextInt(3) + 1);	
+			}
+		}
+		int countOfTrain = 0;
+		for(int i = 0;i<terrain.size();i++)
+		{
+			if(terrain.get(i) == TRAIN_TERRAIN && countOfTrain < 1)
+			{
+				countOfTrain++;
+			}
+			else
+			{
+				int T_set;
+				do{
+					T_set = new Random().nextInt(4);
+					terrain.set(i, T_set);
+				}while(T_set == TRAIN_TERRAIN || T_set == SAFE_TERRAIN);
 			}
 		}
 		
@@ -114,46 +136,38 @@ public class TerrainBuilder{
 				
 				if(bigTerrain.get(i)){
 					obs_start_finish.add(new Point(terrainAXIS.get(i).y,terrainAXIS.get(i).y));
-					System.out.println("ROAD BIG TERRAIN "+ i + "STARTING FROM : "+obs_start_finish.get(i).x + "ENDING AT "+obs_start_finish.get(i).y);
-					
-					
 				}else{
-					obs_start_finish.add(new Point(terrainAXIS.get(i).y,terrainAXIS.get(i).y));
-					System.out.println("ROAD SMALL TERRAIN "+ i + "STARTING FROM : "+obs_start_finish.get(i).x + "ENDING AT "+obs_start_finish.get(i).y);
-					
-					
+					obs_start_finish.add(new Point(terrainAXIS.get(i).y,terrainAXIS.get(i).y));	
 				}
 			}
-			if(terrain.get(i) == SAFE_TERRAIN){
-				
+			if(terrain.get(i) == SAFE_TERRAIN){	
 				if(bigTerrain.get(i)){
 					obs_start_finish.add(new Point(terrainAXIS.get(i).y,terrainAXIS.get(i).y ));
-					System.out.println("SAFE BIG TERRAIN "+ i + "STARTING FROM : "+obs_start_finish.get(i).x + "ENDING AT "+obs_start_finish.get(i).y);
-					
-					
 				}else{
 					obs_start_finish.add(new Point(terrainAXIS.get(i).y,terrainAXIS.get(i).y));
-					System.out.println("SAFE SMALL TERRAIN "+ i + "STARTING FROM : "+obs_start_finish.get(i).x + "ENDING AT "+obs_start_finish.get(i).y);
-					
 				}
 			}
 			if(terrain.get(i) == WATER_TERRAIN){
 				
 				if(bigTerrain.get(i)){
 					obs_start_finish.add(new Point(terrainAXIS.get(i).y,terrainAXIS.get(i).y ));
-					System.out.println("WATER BIG TERRAIN "+ i + "STARTING FROM : "+obs_start_finish.get(i).x + "ENDING AT "+obs_start_finish.get(i).y);
-					
 				}else{
 					obs_start_finish.add(new Point(terrainAXIS.get(i).y,terrainAXIS.get(i).y ));
-					System.out.println("WATER SMALL TERRAIN "+ i + "STARTING FROM : "+obs_start_finish.get(i).x + "ENDING AT "+obs_start_finish.get(i).y);
-					
+				}
+			}
+			if(terrain.get(i) == TRAIN_TERRAIN){
+				if(bigTerrain.get(i)){
+					obs_start_finish.add(new Point(terrainAXIS.get(i).y,terrainAXIS.get(i).y ));
+				}else{
+					obs_start_finish.add(new Point(terrainAXIS.get(i).y,terrainAXIS.get(i).y ));					
 				}
 			}
 			
 		}
 		
 	}
-	protected void destroyTerrain(){
+	protected void destroyTerrain()
+	{
 		obs_start_finish.clear();
 		terrain.clear();
 		bigTerrain.clear();
@@ -167,9 +181,11 @@ public class TerrainBuilder{
 		Obstacles.obstacleImage.clear();
 		Obstacles.obstacleLines.clear();
 		Obstacles.obstacleLineType.clear();
+		Obstacles.trainDir.clear();
+		Obstacles.trainImg.clear();
+		Obstacles.trainObs.clear();
 		Cross.isOnWater = false;
 		Cross.isReadyToLoadGraphics = false;
 		Cross.PLAYER_DIRECTION = Cross.UP;
-		
 	}
 }

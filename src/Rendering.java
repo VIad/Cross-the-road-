@@ -1,9 +1,10 @@
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.Toolkit;
-import java.util.Random;
 
 import javax.swing.JPanel;
 
@@ -34,11 +35,12 @@ public class Rendering extends JPanel{
 	  
 	  private final Image    Train_RIGHT = tk.getImage(getClass().getResource("Obstacles/Train_obs/Train.png"));
 	  private final Image    Train_LEFT = tk.getImage(getClass().getResource("Obstacles/Train_obs/Train_left.png"));
-     protected void paintComponent(Graphics g){
+	  
+      protected void paintComponent(Graphics g){
     	 super.paintComponent(g);
     	 //DRAW TERRAIN
     	 g.drawImage(build.Terrain_safe, build.Terrain_safe_start.x, build.Terrain_safe_start.y, null);
-    	 
+    	try{
          for(int i = 0; i < build.terrain.size();i++){
         	 if(build.terrain.get(i) == TerrainBuilder.ROAD_TERRAIN){
         		 if(build.bigTerrain.get(i)){
@@ -70,7 +72,17 @@ public class Rendering extends JPanel{
         			 g.drawImage(build.Terrain_safe, build.terrainAXIS.get(i).x, build.terrainAXIS.get(i).y, null);
         		 }
         	 }
+        	 if(build.terrain.get(i) == TerrainBuilder.TRAIN_TERRAIN){	 
+        		 if(build.bigTerrain.get(i)){
+        			 g.drawImage(build.Terrain_train, build.terrainAXIS.get(i).x, build.terrainAXIS.get(i).y, null);
+        			 g.drawImage(build.Terrain_safe, build.terrainAXIS.get(i).x, build.terrainAXIS.get(i).y + 100, null);
+        		 }
+        		 else{
+        			 g.drawImage(build.Terrain_train, build.terrainAXIS.get(i).x, build.terrainAXIS.get(i).y, null);
+        		 }
+        	 }
          }
+    	}catch(Exception ex){}
          //DRAW CARS (OBSTACLES)
          try{
          for(int i = 0 ;i<Obstacles.obstacle.size();i++){
@@ -82,10 +94,30 @@ public class Rendering extends JPanel{
         	 }
          }
          }catch(Exception ex){}
-         
+         //DRAW TRAIN
+         try{
+        	 for(int i = 0;i<Obstacles.trainObs.size();i++)
+        	 {
+        		 if(Obstacles.trainDir.get(i))
+        		 {
+        			g.drawImage(Train_RIGHT, Obstacles.trainObs.get(i).x, Obstacles.trainObs.get(i).y, null);
+        			g.drawImage(Obstacles.trainImg.get(i ), Obstacles.trainObs.get(i).x - 225, Obstacles.trainObs.get(i).y, null);
+        			g.drawImage(Obstacles.trainImg.get(i + 1), Obstacles.trainObs.get(i).x - 450, Obstacles.trainObs.get(i).y, null);
+        			g.drawImage(Obstacles.trainImg.get(i + 2), Obstacles.trainObs.get(i).x - 675, Obstacles.trainObs.get(i).y, null);
+        			g.drawImage(Obstacles.trainImg.get(i + 3), Obstacles.trainObs.get(i).x - 900, Obstacles.trainObs.get(i).y, null);
+        		 }
+        		 else
+        		 {
+        			 g.drawImage(Train_LEFT, Obstacles.trainObs.get(i).x, Obstacles.trainObs.get(i).y, null);
+         			 g.drawImage(Obstacles.trainImg.get(i ), Obstacles.trainObs.get(i).x + 225, Obstacles.trainObs.get(i).y, null);
+         			 g.drawImage(Obstacles.trainImg.get(i + 1), Obstacles.trainObs.get(i).x + 450, Obstacles.trainObs.get(i).y, null);
+         			 g.drawImage(Obstacles.trainImg.get(i + 2), Obstacles.trainObs.get(i).x + 675, Obstacles.trainObs.get(i).y, null);
+         			 g.drawImage(Obstacles.trainImg.get(i + 3), Obstacles.trainObs.get(i).x + 900, Obstacles.trainObs.get(i).y, null);
+        		 }
+        	 }
+         }catch(Exception ex){}
                 
     	 //DRAW PLAYER
-    	 g.drawImage(Train_LEFT, 475, 600, null);
     	 
     	 if(Cross.isReadyToLoadGraphics){
     		 if(Cross.isOnWater){
@@ -128,24 +160,27 @@ public class Rendering extends JPanel{
     	 }
     	 }
     	 //STATUSES
-    	 if(Cross.isOver){
-    		 g.setColor(Color.BLACK);
-    		 g.setFont(new Font("Courier New",Font.BOLD,50));
-    		 g.drawString("GAME OVER", 210, 450);
+    	 Graphics2D g2 = (Graphics2D) g;
+    	  
+    	 g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    	 g2.setColor(Color.BLACK);
+    	 g2.setFont(new Font("Courier New",Font.BOLD,20));
+    	 g2.drawString("Ðåçóëòàò : "+Cross.SCORE, 20, 840);
+    	 g2.drawString("Òðóäíîñò : "+(Cross.thread_sleep_param == 3 ?"Ëåñíî" : "Òðóäíî"), 20, 870);
+    	 g2.setColor(Color.RED);
+    	 g2.setFont(new Font("Courier New",Font.BOLD,30));
+    	 g2.drawString((Obstacles.checkForCloseTrain() ? "ÂËÀÊ" : ""), 400, 840);
+    	 if(Cross.isOver){ 
+    		 g2.setColor(Color.BLACK);
+    		 g2.setFont(new Font("Courier New",Font.BOLD,50));
+    		 g2.drawString("ÊÐÀÉ ÍÀ ÈÃÐÀÒÀ", 210, 450);
+    		 g2.drawString("(R) Çà ðåñòàðò", 210, 500);
     	 }
     	 if(Cross.isPaused){
-    		 g.setColor(Color.BLUE);
-    		 g.setFont(new Font("Courier New",Font.BOLD,30));
-    		 g.drawString("Paused", 550, 820);
+    		 g2.setColor(Color.BLUE);
+    		 g2.setFont(new Font("Courier New",Font.BOLD,50));
+    		 g2.drawString("ÏÀÓÇÀ", 210, 450);
     	 }
-    	 if(Cross.isOnWater){
-    		 g.setColor(Color.BLUE);
-    		 g.setFont(new Font("Courier New",Font.BOLD,30));
-    		 g.drawString("On water", 550, 820);
-    	 }
-    	 g.setColor(Color.BLUE);
-		 g.setFont(new Font("Courier New",Font.BOLD,30));
-		 g.drawString("X : "+Cross.player.x+" Y : "+Cross.player.y, 200, 820);
     	 this.repaint();
      }
      

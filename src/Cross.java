@@ -1,20 +1,17 @@
 import java.awt.BorderLayout;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.Random;
+import java.security.SecureRandom;
+
 import javax.swing.JFrame;
 
 public class Cross extends KeyAdapter implements Runnable{
-	/*
-	 * TODO add train
-	 * TODO When all of the above are complete, the game is complete
-	 */
-	
-	
+
 	private JFrame              frame;
 	
-	private Thread              mainGameThread;
+	static Thread               mainGameThread;
 
 	private Rendering           panel;
 	
@@ -29,8 +26,10 @@ public class Cross extends KeyAdapter implements Runnable{
 	static boolean              isReadyToLoadGraphics;
 	static boolean              isSTAT;
 	static boolean              isOnWater;
-	
+
+	static long                 thread_sleep_param;
 	static int                  PLAYER_DIRECTION;
+	static int                  SCORE;
 	
 	static final int            UP = 0;
 	static final int            DOWN = 1;
@@ -41,7 +40,7 @@ public class Cross extends KeyAdapter implements Runnable{
 	private boolean             firstEvent;
 	private boolean             keyWasReleased;
 	private long                move;
-	private long                thread_sleep_param;
+	
 	
 	
 	public static void main(String args[]){
@@ -50,7 +49,8 @@ public class Cross extends KeyAdapter implements Runnable{
 	
 	private void initialize(){
 		isReadyToLoadGraphics = false;
-		frame = new JFrame("Cross the road");
+		frame = new JFrame("Frogger");
+		frame.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("icon.png")));
 		panel = new Rendering();
 		frame.setVisible(true);
 		frame.setSize(707, 930);
@@ -62,6 +62,7 @@ public class Cross extends KeyAdapter implements Runnable{
 		frame.add(panel,BorderLayout.CENTER);
 		startGame();
 	}
+	
 	private void startGame(){
 		isOver = false;
 		mainGameThread = new Thread(this);
@@ -71,9 +72,10 @@ public class Cross extends KeyAdapter implements Runnable{
 		move = System.currentTimeMillis();
 		firstEvent = true;
 		//For testing
-		thread_sleep_param = 8;
+		thread_sleep_param = 3;
 		//For testing
 		keyWasReleased = false;
+		SCORE = 0;
 	    player = new Point(panel.getSize().width / 2 - 25,850);
 	    PLAYER_DIRECTION = UP;
 	    mainGameThread.start();
@@ -88,20 +90,28 @@ public class Cross extends KeyAdapter implements Runnable{
 	public void run(){
 		while(!isOver){
 			if(!isPaused){
+				try{
 				if(player.y >=900 || player.x <=-50 || player.x >=700){
 					isOver = true;
 				}
 				obstacles.moveObstacles();
+				obstacles.moveTrain();
 				obstacles.clearObstacles();
+				obstacles.clearTrain();
 				obstacles.obstaclePlayerCollision();
+				obstacles.collidePlayerTrain();
 				if(player.y <0){
 					builder.destroyTerrain();
 					builder.buildTerrain();
 					obstacles.createObstacleLines();
+					SCORE++;
 				}
-				obstacles.generateObstacles(new Random().nextBoolean());
+				obstacles.generateObstacles(new SecureRandom().nextBoolean());
+				obstacles.generateTrain(new SecureRandom().nextBoolean());
+				
 				if(System.currentTimeMillis() - move > 200) isSTAT = true;
-				else isSTAT = false;	
+				else isSTAT = false;
+				}catch(Exception ex){}
 			}
 			try{Thread.sleep(thread_sleep_param);}catch(InterruptedException e){}
 		}
@@ -150,6 +160,12 @@ public class Cross extends KeyAdapter implements Runnable{
 		if(Event.getKeyCode() == KeyEvent.VK_R && isOver){
 			builder.destroyTerrain();
 			startGame();
+		}
+		if(Event.getKeyCode() == KeyEvent.VK_1){
+			thread_sleep_param = 2;
+		}
+		if(Event.getKeyCode() == KeyEvent.VK_2){
+			thread_sleep_param = 3;
 		}
 		
 	}
